@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cálculo de Investimento</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+            transition: background-color 0.3s, color 0.3s; /* Transição suave */
+        }
+        .container {
+            max-width: 900px;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: #fff;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            position: relative; /* Para posicionar o botão */
+            transition: background-color 0.3s, color 0.3s; /* Transição suave */
+        }
+        h1 {
+            text-align: center;
+        }
+        label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+        input[type="text"], input[type="number"] {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 20px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        button {
+            width: 100%;
+            padding: 10px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s; /* Transição suave */
+        }
+        button:hover {
+            background-color: #218838;
+        }
+        .result {
+            margin-top: 20px;
+            background-color: #e9ecef;
+            padding: 15px;
+            border-radius: 5px;
+        }
+        .result h2 {
+            margin-top: 0;
+        }
+        .result p {
+            margin: 5px 0;
+        }
+        .grafico {
+            text-align: center;
+            margin-top: 20px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        table, th, td {
+            border: 1px solid #ddd;
+        }
+        th, td {
+            padding: 8px;
+            text-align: center;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        
+        /* Estilos para o modo escuro */
+        body.dark-mode {
+            background-color: #121212; /* Cor de fundo escura */
+            color: #ffffff; /* Texto branco */
+        }
+        body.dark-mode .container {
+            background-color: #1e1e1e; /* Fundo do container escuro */
+        }
+        body.dark-mode button {
+            background-color: #007bff; /* Cor dos botões no modo escuro */
+        }
+        body.dark-mode button:hover {
+            background-color: #0056b3; /* Cor mais escura ao passar o mouse no modo escuro */
+        }
+        body.dark-mode .result {
+            background-color: #333; /* Fundo do resultado no modo escuro */
+        }
+        body.dark-mode th {
+            background-color: #444; /* Fundo dos cabeçalhos da tabela no modo escuro */
+        }
+
+        /* Estilo do botão de alternância */
+        .toggle-button {
+            position: absolute; /* Posiciona o botão */
+            top: 20px; /* Distância do topo */
+            right: 20px; /* Distância do lado direito */
+            background-color: #ffcc00; /* Cor de fundo distinta */
+            border: 2px solid #ffd700; /* Borda dourada */
+            border-radius: 50%; /* Forma arredondada */
+            width: 60px; /* Largura maior */
+            height: 60px; /* Altura maior */
+            font-size: 24px; /* Tamanho do emoji */
+            cursor: pointer; /* Cursor de ponteiro */
+            transition: transform 0.2s, box-shadow 0.2s; /* Transição ao passar o mouse */
+            display: flex; /* Flexbox para centralizar o emoji */
+            align-items: center; /* Centraliza verticalmente */
+            justify-content: center; /* Centraliza horizontalmente */
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3); /* Sombra */
+        }
+        
+        .toggle-button:hover {
+            transform: scale(1.1); /* Aumenta o tamanho do botão ao passar o mouse */
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.4); /* Sombra mais forte ao passar o mouse */
+        }
+        
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Simulador de Investimento</h1>
+
+        <!-- Botão de alternância de modo com emojis -->
+        <button id="toggle-mode" class="toggle-button">🌙</button> <!-- Emojis para representar o modo escuro -->
+
+        <form method="POST">
+            <label for="valor_inicial">Valor Inicial (R$):</label>
+            <input type="number" id="valor_inicial" name="valor_inicial" required>
+
+            <label for="aporte_mensal">Aporte Mensal (R$):</label>
+            <input type="number" id="aporte_mensal" name="aporte_mensal" required>
+
+            <label for="anos">Quantidade de Anos:</label>
+            <input type="number" id="anos" name="anos" required>
+
+            <label for="juros_ano">Taxa de Juros Anual (%):</label>
+            <input type="number" id="juros_ano" name="juros_ano" step="0.01" required>
+
+            <button type="submit">Calcular</button>
+        </form>
+
+        {% if resultado %}
+        <div class="result">
+            <h2>Resultado do Investimento:</h2>
+            <p><strong>Saldo Final:</strong> {{ resultado.saldo_final }}</p>
+            <p><strong>Total Aportado:</strong> {{ resultado.total_aportado }}</p>
+            <p><strong>Total de Dividendos:</strong> {{ resultado.total_dividendos }}</p>
+            <p><strong>Rendimento Total:</strong> {{ resultado.rendimento_total }}</p>
+        </div>
+
+        <div class="grafico">
+            <h3>Gráfico da Evolução do Investimento</h3>
+            <img src="data:image/png;base64,{{ grafico_url }}" alt="Gráfico de Evolução">
+        </div>
+
+        <div>
+            <h3>Histórico Mensal Completo</h3>
+            {{ df_historico_html|safe }}
+        </div>
+        {% endif %}
+    </div>
+
+    <script>
+        // Script para alternar entre o modo claro e escuro
+        const toggleButton = document.getElementById('toggle-mode');
+
+        toggleButton.addEventListener('click', () => {
+            document.body.classList.toggle('dark-mode');
+            toggleButton.innerText = document.body.classList.contains('dark-mode') ? '🌞' : '🌙'; // Altera o emoji
+        });
+    </script>
+</body>
+</html>
